@@ -156,12 +156,6 @@ require([
             deepEqual(legend._sortedCategories, ["hjkl"]);
             deepEqual(legend._category2color, colorInfo);
         });
-        test("addCategoricalKey (error: no categories)", function () {
-            var legend = new Legend(this.containerEle);
-            throws(function () {
-                legend.addCategoricalKey("oops", {});
-            }, /Can't create a categorical legend when there are no categories in the info/);
-        });
         test("addContinuousKey", function () {
             var legend = new Legend(this.containerEle);
             var colorer = new Colorer("Viridis", ["0", "4"], true);

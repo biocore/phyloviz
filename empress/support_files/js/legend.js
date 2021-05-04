@@ -218,17 +218,8 @@ define(["jquery", "underscore", "util"], function ($, _, util) {
      * @param {Object} info Color key information. This should map unique
      *                      values (e.g. in sample or feature metadata) to
      *                      their assigned color, expressed in hex format.
-     *
-     * @throws {Error} If info has no keys. This check is done before anything
-     *                 else is done in this function.
      */
     Legend.prototype.addCategoricalKey = function (name, info) {
-        if (_.isEmpty(info)) {
-            throw new Error(
-                "Can't create a categorical legend when there are no " +
-                    "categories in the info"
-            );
-        }
         this.clear();
         this.addTitle(name);
         this._sortedCategories = util.naturalSort(_.keys(info));

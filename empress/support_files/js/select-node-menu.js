@@ -343,7 +343,6 @@ define(["underscore", "util"], function (_, util) {
             this.nodeNameLabel.textContent = "Name: " + name;
         }
         hide(this.nodeNameWarning);
-
         // show either leaf or internal node
         var t = emp._tree;
         if (t.isleaf(t.postorderselect(this.nodeKeys[0]))) {
@@ -431,7 +430,6 @@ define(["underscore", "util"], function (_, util) {
         }
 
         var name = this.empress.getNodeInfo(this.nodeKeys[0], "name");
-
         // Figure out whether or not we know the actual node in the tree (for
         // example, if the user searched for a node with a duplicate name, then
         // we don't know which node the user was referring to). This impacts

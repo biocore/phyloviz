@@ -44,6 +44,48 @@ define(["LayoutsUtil", "Colorer"], function (LayoutsUtil, Colorer) {
         yield* nodes;
     };
 
+    /**
+     * Returns all nodes in the clade whose root is node.
+     *
+     * Note: elements in the returned array are keys in this._treeData
+     *       also, the returned array is sorted in a postorder fashion
+     *
+     * @param {Number} cladeRoot The root of the clade. An error is thrown if
+     *                           cladeRoot is not a valid node.
+     *
+     * @return {Array} The nodes in the clade
+     */
+    TreeModel.prototype.getCladeNodes = function (cladeRoot) {
+        cladeRoot = this.fullToSheared.get(cladeRoot);
+        if (cladeRoot === undefined) {
+            throw cladeRoot + " is not a valid node.";
+        }
+        // stores the clade nodes
+        var cladeNodes = [];
+
+        // Nodes in the clade are found by performing a postorder traversal
+        // starting at the left most child of the clade and ending on cladeRoot
+
+        // find left most child
+        // Note: initializing lchild as cladeRoot incase cladeRoot is a tip
+        var lchild = cladeRoot;
+        var fchild = this.shearedTree.fchild(
+            this.shearedTree.postorderselect(cladeRoot)
+        );
+        while (fchild !== 0) {
+            lchild = this.shearedTree.postorder(fchild);
+            fchild = this.shearedTree.fchild(
+                this.shearedTree.postorderselect(lchild)
+            );
+        }
+
+        // perform post order traversal until cladeRoot is reached.
+        for (var i = lchild; i <= cladeRoot; i++) {
+            cladeNodes.push(this.shearedToFull.get(i));
+        }
+        return cladeNodes;
+    };
+
     function TreeController(tree) {
         /**
          *
@@ -76,6 +118,7 @@ define(["LayoutsUtil", "Colorer"], function (LayoutsUtil, Colorer) {
          */
         this.model = new TreeModel(tree);
         this.size = this.model.fullTree.size;
+        this.currentSize = this.model.shearedTree.size;
     }
 
     /**
@@ -95,6 +138,7 @@ define(["LayoutsUtil", "Colorer"], function (LayoutsUtil, Colorer) {
      */
     TreeController.prototype.shear = function (tips) {
         this.model.shear(tips);
+        this.currentSize = this.model.shearedTree.size;
     };
 
     /**
@@ -102,6 +146,7 @@ define(["LayoutsUtil", "Colorer"], function (LayoutsUtil, Colorer) {
      */
     TreeController.prototype.unshear = function () {
         this.model.unshear();
+        this.currentSize = this.model.shearedTree.size;
     };
 
     /**
@@ -469,6 +514,21 @@ define(["LayoutsUtil", "Colorer"], function (LayoutsUtil, Colorer) {
             nodes[i] = this.model.shearedToFull.get(nodes[i]);
         }
         return nodes;
+    };
+
+    /**
+     * Returns all nodes in the clade whose root is node.
+     *
+     * Note: elements in the returned array are keys in this._treeData
+     *       also, the returned array is sorted in a postorder fashion
+     *
+     * @param {Number} cladeRoot The root of the clade. An error is thrown if
+     *                           cladeRoot is not a valid node.
+     *
+     * @return {Array} The nodes in the clade
+     */
+    TreeController.prototype.getCladeNodes = function (cladeRoot) {
+        return this.model.getCladeNodes(cladeRoot);
     };
 
     return TreeController;

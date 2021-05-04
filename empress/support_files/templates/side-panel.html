@@ -257,6 +257,40 @@
   </div>
 </div>
 
+<!-- Shear options -->
+<button id="shearOpenButton" class="side-header collapsible needs-feature-metadata">
+    Shear Tree</button>
+<div class="side-content control hidden" id="shear-div">
+  <p class="side-panel-notes">
+     Shear the tree to tips with certain feature metadata values.
+  </p>
+
+  <p class="side-panel-notes">
+    <span style="font-weight: bold;">Warning:</span> By design, shearing
+    will change the topology of the tree: the resulting visualization may be
+    misleading, especially if shown without context.
+  </p>
+  <p class="side-panel-notes">
+    <span style="font-weight: bold;">Performance Note:</span> If shearing is
+    taking a long time for your dataset, you may want to try disabling tree
+    coloring and barplots before shearing.
+  </p>
+  <div id="shear-add-options">
+    <p>
+      <label for="shear-feature-select">Shear by...</label>
+      <label class="select-container">
+        <select id="shear-feature-select"></select>
+      </label>
+    </p>
+    <p>
+      <label for="shear-add-btn">Add shear filter</label>
+      <button id="shear-add-btn">+</button>
+    </p>
+  </div>
+  <div id="shear-legends">
+  </div>
+</div>
+
 <!-- animate Options -->
 <button id="animationOpenButton" class="side-header collapsible hidden">
     Animation</button>
@@ -392,10 +426,20 @@
     if specified, is not included in the node length statistics. Node length
     statistics are rounded to four decimal places.
   </p>
-  <p class="needs-community-data side-panel-notes">
-    Also note that these statistics only pertain to the tree shown here; if the
-    tree was sheared to a table, for example, the node counts shown here will
-    be lower than for the full tree.
+  <p class="needs-feature-metadata side-panel-notes">
+    These statistics will be automatically updated as the tree is sheared
+    using the "Shear Tree" functionality.
+  </p>
+  <p class="needs-metadata side-panel-notes">
+    Note that these statistics only pertain to the tree shown here,
+    and don't account for modifications to the tree done before this
+    visualization. For example, if the
+    tree was sheared to a table using Empress' command-line interface
+    (this is the default behavior of the
+    <span style="font-family: monospace;">shear-to-table</span>
+    parameter of <span style="font-family: monospace;">community-plot</span>)
+    then the node counts shown here will only reflect the
+    resulting sheared tree.
   </p>
 </div>
 

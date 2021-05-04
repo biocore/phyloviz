@@ -25,37 +25,35 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         });
 
         test("Test shear", function () {
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([2, 3]));
 
             // checks to make sure correct names are kept
-            var shearNames = [null, "t2", "t3", "i4", "i5", "r"];
+            var shearNames = [null, "t1", "i5", "t6", "r"];
             var resutlNames = this.treeController.model.shearedTree.names_;
             deepEqual(resutlNames, shearNames);
 
-            var shearLengths = [null, 2, 3, 4, 5, null];
+            var shearLengths = [null, 1, 5, 6, null];
             var resultLengts = this.treeController.model.shearedTree.lengths_;
             deepEqual(resultLengts, shearLengths);
 
             // checks to make sure structre of tree is correct
-            var shearTree = [1, 1, 1, 1, 0, 1, 0, 0, 0, 0];
+            var shearTree = [1, 1, 1, 0, 0, 1, 0, 0];
             var resultTree = this.treeController.model.shearedTree.b_;
             deepEqual(resultTree, shearTree);
 
             // checks to make sure the mappings from orignal tree to shear tree
             // is correct and vice-versa
             var fullToSheared = new Map([
-                [2, 1],
-                [3, 2],
-                [4, 3],
-                [5, 4],
-                [7, 5],
+                [1, 1],
+                [5, 2],
+                [6, 3],
+                [7, 4],
             ]);
             var shearedToFull = new Map([
-                [1, 2],
-                [2, 3],
-                [3, 4],
-                [4, 5],
-                [5, 7],
+                [1, 1],
+                [2, 5],
+                [3, 6],
+                [4, 7],
             ]);
             var resultOrigToCur = this.treeController.model.fullToSheared;
             var resultCurToOrig = this.treeController.model.shearedToFull;
@@ -64,7 +62,7 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         });
 
         test("Test unshear", function () {
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([1, 6]));
             this.treeController.unshear();
 
             deepEqual(this.treeController.model.shearedTree.names_, this.names);
@@ -87,7 +85,7 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         });
 
         test("Test postorderTraversal", function () {
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([1, 6]));
             var nodes = [2, 3, 4, 5, 7];
             var result = [
                 ...this.treeController.postorderTraversal((includeRoot = true)),
@@ -111,7 +109,7 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         });
 
         test("Test getLengthStats", function () {
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([1, 6]));
             var stats = {
                 avg: 3.5,
                 min: 2,
@@ -139,7 +137,7 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         });
 
         test("Test getAllNames", function () {
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([1, 6]));
             var shearNames = ["t2", "t3", "i4", "i5", "r"];
             var resutlNames = this.treeController.getAllNames();
             deepEqual(resutlNames, shearNames);
@@ -150,7 +148,7 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         });
 
         test("Test numleaves", function () {
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([1, 6]));
             equal(this.treeController.numleaves(), 2);
 
             this.treeController.unshear();
@@ -195,7 +193,7 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         test("Test fchild", function () {
             // fchild's input/output is in respect to the original tree.
             // However, fchild will use the topology of the sheared tree.
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([1, 6]));
             var index = this.treeController.postorderselect(5);
             var fchild = this.treeController.fchild(index);
             var expected = this.treeController.postorderselect(4);
@@ -211,7 +209,7 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         test("Test lchild", function () {
             // lchild's input/output is in respect to the original tree.
             // However, lchild will use the topology of the sheared tree.
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([1, 6]));
             var index = this.treeController.postorderselect(7);
             var lchild = this.treeController.lchild(index);
             var expected = this.treeController.postorderselect(5);
@@ -227,7 +225,7 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         test("Test nsibling", function () {
             // nsibling's input/output is in respect to the original tree.
             // However, nsibling will use the topology of the sheared tree.
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([1, 6]));
             var index = this.treeController.postorderselect(5);
             var nsibling = this.treeController.nsibling(index);
             var expected = 0; // doesn't have a next sibling
@@ -243,7 +241,7 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         test("Test psibling", function () {
             // psibling's input/output is in respect to the original tree.
             // However, psibling will use the topology of the sheared tree.
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([1, 6]));
             var index = this.treeController.postorderselect(4);
             var psibling = this.treeController.psibling(index);
             var expected = 0; // doesn't have a next sibling
@@ -289,7 +287,7 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         test("Test inOrderTraversal", function () {
             // inOrderTraversal's input/output is in respect to the original tree.
             // However, inOrderTraversal will use the topology of the sheared tree.
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([1, 6]));
             var expected = [7, 5, 4, 2, 3];
             var result = [
                 ...this.treeController.inOrderTraversal((includeRoot = true)),
@@ -317,7 +315,7 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         test("Test getTotalLength", function () {
             // getTotalLength's input/output is in respect to the original tree.
             // However, getTotalLength will use the topology of the sheared tree.
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([1, 6]));
             var result = this.treeController.getTotalLength(2, 7);
             equal(result, 11);
 
@@ -329,7 +327,7 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         test("Test findTips", function () {
             // findTips's input/output is in respect to the original tree.
             // However, findTips will use the topology of the sheared tree.
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([1, 6]));
             var result = this.treeController.findTips(5);
             deepEqual(result, [2, 3]);
 
@@ -341,7 +339,7 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         test("Test getNumTips", function () {
             // getNumTips's input/output is in respect to the original tree.
             // However, getNumTips will use the topology of the sheared tree.
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([1, 6]));
             var result = this.treeController.getNumTips(5);
             deepEqual(result, 2);
 
@@ -351,7 +349,7 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         });
 
         test("Test containsNode", function () {
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([1, 6]));
             var result = this.treeController.containsNode("t1");
             equal(result, false);
 
@@ -363,7 +361,7 @@ require(["jquery", "UtilitiesForTesting", "util", "TreeController"], function (
         test("Test getNodesWithName", function () {
             // getNodesWithName's input/output is in respect to the original tree.
             // However, getNodesWithName will use the topology of the sheared tree.
-            this.treeController.shear(new Set(["t2", "t3"]));
+            this.treeController.shear(new Set([1, 6]));
             var result = this.treeController.getNodesWithName("t2");
             deepEqual(result, [2]);
             result = this.treeController.getNodesWithName("t1");
