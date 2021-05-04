@@ -19,7 +19,7 @@ require([
     util,
     Colorer
 ) {
-    module("animation-panel-handler", {
+    module("Animation Panel Handler", {
         setup: function () {
             // add test compenents to this div
             this.div = document.getElementById("test-div");
@@ -50,6 +50,22 @@ require([
             lWidth.setAttribute("id", "animate-line-width");
             lWidth.setAttribute("value", 1);
             this.div.appendChild(lWidth);
+
+            var startBtnP = document.createElement("button");
+            startBtnP.setAttribute("id", "animate-start-btn-p");
+            this.div.appendChild(startBtnP);
+
+            var stopBtnP = document.createElement("button");
+            stopBtnP.setAttribute("id", "animate-stop-btn-p");
+            this.div.appendChild(stopBtnP);
+
+            var pauseBtnP = document.createElement("button");
+            pauseBtnP.setAttribute("id", "animate-pause-btn-p");
+            this.div.appendChild(pauseBtnP);
+
+            var rpnBtnP = document.createElement("button");
+            rpnBtnP.setAttribute("id", "animate-resume-prev-next-btn-p");
+            this.div.appendChild(rpnBtnP);
 
             var startBtn = document.createElement("button");
             startBtn.setAttribute("id", "animate-start-btn");
@@ -205,27 +221,23 @@ require([
     test("startOptions", function () {
         this.panel.startOptions();
         // the following should be hidden
-        ok(this.panel.stopBtn.classList.contains("hidden"));
-        ok(this.panel.pauseBtn.classList.contains("hidden"));
-        ok(this.panel.resumeBtn.classList.contains("hidden"));
-        ok(this.panel.prevFrameBtn.classList.contains("hidden"));
-        ok(this.panel.nextFrameBtn.classList.contains("hidden"));
+        ok(this.panel.stopBtnP.classList.contains("hidden"));
+        ok(this.panel.pauseBtnP.classList.contains("hidden"));
+        ok(this.panel.rpnBtnP.classList.contains("hidden"));
 
         // show the following buttons
-        ok(!this.panel.startBtn.classList.contains("hidden"));
+        ok(!this.panel.startBtnP.classList.contains("hidden"));
     });
 
     test("__pauseOptions", function () {
         this.panel.__pauseOptions();
         // the following should be hidden
-        ok(this.panel.startBtn.classList.contains("hidden"));
-        ok(this.panel.resumeBtn.classList.contains("hidden"));
-        ok(this.panel.prevFrameBtn.classList.contains("hidden"));
-        ok(this.panel.nextFrameBtn.classList.contains("hidden"));
+        ok(this.panel.startBtnP.classList.contains("hidden"));
+        ok(this.panel.rpnBtnP.classList.contains("hidden"));
 
         // show the following buttons
-        ok(!this.panel.stopBtn.classList.contains("hidden"));
-        ok(!this.panel.pauseBtn.classList.contains("hidden"));
+        ok(!this.panel.stopBtnP.classList.contains("hidden"));
+        ok(!this.panel.pauseBtnP.classList.contains("hidden"));
     });
 
     test("__resumeOptions", function () {
@@ -238,30 +250,22 @@ require([
 
         // the followinng should be hidden
         ok(
-            this.panel.pauseBtn.classList.contains("hidden"),
-            "pause button should be hidden"
+            this.panel.pauseBtnP.classList.contains("hidden"),
+            "pause button's container should be hidden"
         );
         ok(
-            this.panel.startBtn.classList.contains("hidden"),
-            "start button should be hidden"
+            this.panel.startBtnP.classList.contains("hidden"),
+            "start button's container should be hidden"
         );
 
         // show the following buttons
         ok(
-            !this.panel.stopBtn.classList.contains("hidden"),
-            "stop button should be visible"
+            !this.panel.stopBtnP.classList.contains("hidden"),
+            "stop button's container should be visible"
         );
         ok(
-            !this.panel.resumeBtn.classList.contains("hidden"),
-            "resume button should be visible"
-        );
-        ok(
-            !this.panel.prevFrameBtn.classList.contains("hidden"),
-            "previous button should be visible"
-        );
-        ok(
-            !this.panel.nextFrameBtn.classList.contains("hidden"),
-            "next button should be visible"
+            !this.panel.rpnBtnP.classList.contains("hidden"),
+            "resume/pause/next buttons' containers should be visible"
         );
 
         // animator should be on first frame
@@ -275,10 +279,10 @@ require([
         ok(!this.panel.nextFrameBtn.disabled, "next button should be enabled");
 
         // set animator to a middle frame
-        this.panel.animator.curFrame = 2;
+        this.panel.animator.curFrame = 1;
         this.panel.__resumeOptions();
 
-        // if animaotr is on a middle frame then prev/nextFrameBtn should
+        // if animator is on a middle frame then prev/nextFrameBtn should
         // be enabled
         ok(
             !this.panel.prevFrameBtn.disabled,
@@ -287,7 +291,7 @@ require([
         ok(!this.panel.nextFrameBtn.disabled, "next button should be enabled");
 
         // set animator to last frame
-        this.panel.animator.curFrame = 3;
+        this.panel.animator.curFrame = 2;
         this.panel.__resumeOptions();
 
         // if animator is on last frame then prevFrameBtn should be enabled

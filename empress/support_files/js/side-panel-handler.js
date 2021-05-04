@@ -61,6 +61,7 @@ define(["underscore", "Colorer", "util"], function (_, Colorer, util) {
         );
         this.sLineWidth = document.getElementById("sample-line-width");
         this.sUpdateBtn = document.getElementById("sample-update");
+        this.sUpdateBtnP = document.getElementById("sm-update-container");
 
         // feature metadata GUI components
         this.fChk = document.getElementById("feature-chk");
@@ -75,6 +76,7 @@ define(["underscore", "Colorer", "util"], function (_, Colorer, util) {
         );
         this.fLineWidth = document.getElementById("feature-line-width");
         this.fUpdateBtn = document.getElementById("feature-update");
+        this.fUpdateBtnP = document.getElementById("fm-update-container");
         this.fMethodChk = document.getElementById("fm-method-chk");
         this.fMethodDesc = document.getElementById("fm-method-desc");
 
@@ -233,7 +235,7 @@ define(["underscore", "Colorer", "util"], function (_, Colorer, util) {
                 sLineWidth: { value: 0 },
                 sCollapseCladesChk: { checked: false },
             },
-            [this.sAddOpts, this.sUpdateBtn]
+            [this.sAddOpts, this.sUpdateBtnP]
         );
     };
 
@@ -249,7 +251,7 @@ define(["underscore", "Colorer", "util"], function (_, Colorer, util) {
                 fMethodChk: { checked: true },
                 fCollapseCladesChk: { checked: false },
             },
-            [this.fAddOpts, this.fUpdateBtn]
+            [this.fAddOpts, this.fUpdateBtnP]
         );
         // Since we reset fMethodChk above to its "default" of being checked,
         // we also update fMethodDesc to be consistent. Note that updating
@@ -280,21 +282,24 @@ define(["underscore", "Colorer", "util"], function (_, Colorer, util) {
      * @param {HTMLElement} lwInput An <input> with type="number" from which
      *                              we'll get the .value indicating the line
      *                              width to use when thickening lines.
-     * @param {HTMLElement} updateBtn This element will be hidden at the end of
-     *                                this function. It should correspond to
-     *                                the "Update" button for the sample or
-     *                                feature metadata coloring tab.
+     * @param {HTMLElement} toHide This element will be hidden at the end of
+     *                             this function. It should correspond to
+     *                             the "Update" button (or ideally its
+     *                             container) for the sample or
+     *                             feature metadata coloring tab.
      */
     SidePanel.prototype._updateColoring = function (
         colorMethodName,
         collapseChk,
         lwInput,
-        updateBtn
+        toHide
     ) {
         this.empress.resetTree();
 
-        // hide update button
-        updateBtn.classList.add("hidden");
+        // hide update button or its container
+        // (hiding the container is preferable, since empty <p> tags still
+        // take up space)
+        toHide.classList.add("hidden");
 
         // color tree
         this[colorMethodName]();
@@ -320,7 +325,7 @@ define(["underscore", "Colorer", "util"], function (_, Colorer, util) {
             util.toastMsg(
                 "No unique branches found for this metadata category"
             );
-            this.sUpdateBtn.classList.remove("hidden");
+            this.sUpdateBtnP.classList.remove("hidden");
             return;
         }
     };
@@ -509,14 +514,14 @@ define(["underscore", "Colorer", "util"], function (_, Colorer, util) {
                 scope._resetFeatureTab();
                 scope.sSel.disabled = false;
                 scope.sAddOpts.classList.remove("hidden");
-                scope.sUpdateBtn.classList.remove("hidden");
+                scope.sUpdateBtnP.classList.remove("hidden");
             } else {
                 scope._resetSampleTab();
             }
         };
 
         var showUpdateBtn = function () {
-            scope.sUpdateBtn.classList.remove("hidden");
+            scope.sUpdateBtnP.classList.remove("hidden");
         };
         this.sSel.onchange = showUpdateBtn;
         this.sColor.onchange = showUpdateBtn;
@@ -528,7 +533,7 @@ define(["underscore", "Colorer", "util"], function (_, Colorer, util) {
                 "_colorSampleTree",
                 scope.sCollapseCladesChk,
                 scope.sLineWidth,
-                scope.sUpdateBtn
+                scope.sUpdateBtnP
             );
         };
 
@@ -600,14 +605,14 @@ define(["underscore", "Colorer", "util"], function (_, Colorer, util) {
                 scope.updateFeatureMethodDesc();
                 scope.fSel.disabled = false;
                 scope.fAddOpts.classList.remove("hidden");
-                scope.fUpdateBtn.classList.remove("hidden");
+                scope.fUpdateBtnP.classList.remove("hidden");
             } else {
                 scope._resetFeatureTab();
             }
         };
 
         var showUpdateBtn = function () {
-            scope.fUpdateBtn.classList.remove("hidden");
+            scope.fUpdateBtnP.classList.remove("hidden");
         };
         this.fSel.onchange = showUpdateBtn;
         this.fColor.onchange = showUpdateBtn;
@@ -623,7 +628,7 @@ define(["underscore", "Colorer", "util"], function (_, Colorer, util) {
                 "_colorFeatureTree",
                 scope.fCollapseCladesChk,
                 scope.fLineWidth,
-                scope.fUpdateBtn
+                scope.fUpdateBtnP
             );
         };
 

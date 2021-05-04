@@ -55,8 +55,8 @@
         <input id="sample-line-width" type="number" value="0" min="0"
                step="any" class="empress-input">
       </p>
-      <p>
-        <button id="sample-update" class="hidden">Update</button>
+      <p id="sm-update-container" class="hidden">
+        <button id="sample-update">Update</button>
       </p>
     </div>
   </p>
@@ -85,11 +85,11 @@
           <select id="feature-color"></select>
         </label>
       </p>
-    <p>
-      <label for="feature-reverse-color-chk">Reverse Color Map</label>
-      <input id="feature-reverse-color-chk" type="checkbox" value="false"
-             class="empress-input">
-    </p>
+      <p>
+        <label for="feature-reverse-color-chk">Reverse Color Map</label>
+        <input id="feature-reverse-color-chk" type="checkbox" value="false"
+               class="empress-input">
+      </p>
       <p>
         <label for="feature-collapse-chk">Collapse Clades</label>
         <input id="feature-collapse-chk" type="checkbox" value="false"
@@ -114,8 +114,8 @@
         <p class="side-panel-notes indented" id="fm-method-desc">
         </p>
       </p>
-      <p>
-        <button id="feature-update" class="hidden">Update</button>
+      <p id="fm-update-container" class="hidden">
+        <button id="feature-update">Update</button>
       </p>
     </div>
   </p>
@@ -304,17 +304,17 @@
            step="any" class="empress-input">
   </p>
   <div>
-    <p>
+    <p id="animate-start-btn-p">
       <button id="animate-start-btn">Start</button>
     </p>
-    <p>
+    <p id="animate-stop-btn-p">
       <button id="animate-stop-btn">Stop Animation</button>
     </p>
-    <p>
+    <p id="animate-pause-btn-p">
       <button id="animate-pause-btn">Pause</button>
     </p>
     <div>
-      <p>
+      <p id="animate-resume-prev-next-btn-p">
         <button id="animate-resume-btn">Resume</button>
         <button id="animate-prev-btn">Previous Frame</button>
         <button id="animate-next-btn">Next Frame</button>

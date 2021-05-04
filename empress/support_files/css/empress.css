@@ -501,6 +501,11 @@ p.side-header button:hover,
     background-color: dimgray;
 }
 
+.control p button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
 .control p button:only-child {
     margin-right: auto;
 }

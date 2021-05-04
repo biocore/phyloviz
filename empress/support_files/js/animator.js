@@ -418,12 +418,10 @@ define(["Colorer", "util"], function (Colorer, util) {
     /**
      * Checks to see if state machine is on last frame
      *
-     * @return {Boolean} true if animator is on last frame
+     * @return {Boolean} true if animator is on last frame (or beyond, somehow)
      */
     Animator.prototype.onLastFrame = function () {
-        // curFrame is always the next frame to draw so if curFrame is
-        // equal to totalFrames, the last frame was just drawn
-        return this.curFrame == this.totalFrames;
+        return this.curFrame >= this.totalFrames - 1;
     };
 
     return Animator;
