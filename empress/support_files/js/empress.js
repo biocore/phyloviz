@@ -165,6 +165,11 @@ define([
          */
         this._legend = new Legend(document.getElementById("legend-main"));
 
+        // rename to this._legendModel
+        this._legendModel = this._legend.model;
+        // TODO update the observers when legend changes
+        this._legendModel.registerObserver(this);
+
         /**
          * @type {BiomTable}
          * BIOM table: includes feature presence information and sample-level
@@ -2250,8 +2255,8 @@ define([
         // assigns node in obs to groups in this._groups
         this.assignGroups(obs);
 
-        // color tree
-        this._colorTree(obs, cm);
+        this._legend.enableUpdate();
+        this.updateLegend = this._updateLegendFromModel(obs);
 
         this.updateLegendCategorical(cat, keyInfo);
 
@@ -2477,13 +2482,54 @@ define([
         // assigns nodes in to a group in this._group array
         this.assignGroups(obs);
 
-        // color tree
-        this._colorTree(obs, cm);
+        this._legend.enableUpdate();
+        this.updateLegend = this._updateLegendFromModel(obs);
 
         this.updateLegendCategorical(cat, keyInfo);
 
         return keyInfo;
     };
+
+    /**
+     * A method for updating tree coloring from _legendModel
+     *
+     * @param{Object} obs Maps categories to the unique nodes to be colored for
+     *                    each category.
+     * @returns {Function} Function to be called when the LegendModel updates.
+     * @private
+     */
+    Empress.prototype._updateLegendFromModel = function (obs) {
+        // A few known issues:
+        // Legend changes are not kept on:
+        // * changing collapse
+        // * changing line width
+        //
+        // These can be tied to how the update button is implemented in
+        // the side panel handler (it resets the legend).
+        // We may want to refactor it to continue to use the legend
+        // state that is in the active legend.
+        return () => {
+            var scope = this;
+            var hexmap = scope._legendModel.getColorMap();
+            var rgbmap = _.mapObject(hexmap, Colorer.hex2RGB);
+            scope._colorTree(obs, rgbmap);
+            // this allows us to recolor collapsed clades
+            if (!_.isEmpty(scope._collapsedClades)) {
+                _.map(scope._collapsedClades, (info, node) => {
+                    var color = scope.getNodeInfo(node, "color");
+                    info.color = color;
+                });
+                scope.collapseClades();
+            }
+            scope.drawTree();
+        };
+    };
+
+    /**
+     * Function called when there is an update to any LegendModel that
+     * Empress subscribes to.
+     */
+    Empress.prototype.updateLegend = function () {};
 
     /*
      * Projects the groups in obs up the tree.

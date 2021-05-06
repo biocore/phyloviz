@@ -1,7 +1,179 @@
-define(["jquery", "underscore", "util"], function ($, _, util) {
+define(["jquery", "underscore", "util", "spectrum"], function (
+    $,
+    _,
+    util,
+    spectrum
+) {
+    /**
+     * Class ColorEditor
+     *
+     * Provides a class for constructing a spectrum color picker for a container.
+     *
+     * @param {Object} args Options for configuring the color picker.
+     * @param {HTMLElement} args.container Container to append the color picker to.
+     * @param {Array} args.palette (Optional) palette to pick colors from in the picker.
+     * @param {String} args.colorKey The key that should have its color updated by the picker.
+     * @param {String} args.color Color to initialize the picker with.
+     * @param {LegendController} args.controller A controller to send color updates to.
+     *
+     * @return ColorEditor
+     * @constructs ColorEditor
+     */
+    function ColorEditor(args) {
+        // TODO
+        // NOTE: We are having trouble getting the spectrum picker to show
+        //  on initialization...
+        //  Additionally, it seems like the colorbox class adds a border and
+        //  changes the shape of the ColorCell and we would prefer to not
+        //  do that.
+        this.$input = $("<div class='colorbox'></div>");
+        this.$input.appendTo($(args.container));
+
+        // initialize spectrum (heavily lifted from Emperor)
+        this.$input.spectrum({
+            color: args.color,
+            showInput: true,
+            allowEmpty: false,
+            showInitial: true,
+            clickoutFiresChange: true,
+            className: "full-spectrum",
+            preferredFormat: "hex6",
+            // Show the whole set of color palette on the menu (only discrete)
+            showPalette: args.palette !== undefined,
+            showSelectionPalette: args.palette !== undefined,
+            palette: args.palette,
+
+            /* On change callback */
+            change: function (color) {
+                const col = color.toHexString();
+                var map = {};
+                map[args.colorKey] = col;
+                args.controller.remapColors(map);
+            },
+        });
+    }
+
+    /**
+     * Class LegendModel
+     *
+     * Maintains Observable information for mapping key values to colors to be rendered.
+     *
+     * @param {Object} map Object mapping key values to HexStrings.
+     * @return {LegendModel}
+     * @constructs {LegendModel}
+     */
+    function LegendModel(map) {
+        this.map = map;
+        this.observers = [];
+        this.name = undefined;
+    }
+
+    /**
+     * Resets the legend.
+     */
+    LegendModel.prototype.clear = function () {
+        this.map = {};
+        this.name = undefined;
+        // not notifying...
+    };
+
+    /**
+     * Adds an observer to the model.
+     *
+     * @param {LegendObserver} observer An Object that should observe the model.
+     */
+    LegendModel.prototype.registerObserver = function (observer) {
+        this.observers.push(observer);
+    };
+
+    /**
+     * Removes the specified observer from the objects observers.
+     *
+     * @param {LegendObserver} observer The observer to be unregistered.
+     */
+    LegendModel.prototype.unregisterObserver = function (observer) {
+        const index = this.observers.indexOf(observer);
+        if (index > -1) {
+            this.observers.splice(index, 1);
+        }
+    };
+
+    /**
+     * Functionality for setting the color map.
+     *
+     * @param {Object} map Key to color mapping.
+     */
+    LegendModel.prototype.setColorMap = function (map) {
+        this.map = map;
+        this.notify();
+    };
+
+    /**
+     * Allows getting the color map for the pull observers.
+     */
+    LegendModel.prototype.getColorMap = function () {
+        return this.map;
+    };
+
+    /**
+     * Functionality for setting the name of the legend.
+     *
+     * @param {String} name The name of the legend.
+     */
+    LegendModel.prototype.setName = function (name) {
+        this.name = name;
+        this.notify();
+    };
+
+    /**
+     * Gets the name of the legend.
+     */
+    LegendModel.prototype.getName = function () {
+        return this.name;
+    };
+
+    /**
+     * Allows setting the colors for specifc keys.
+     * @param {Object} update Values that should be added or updated in the legend.
+     */
+    LegendModel.prototype.updateColorMap = function (update) {
+        _.extend(this.map, update);
+        this.notify();
+    };
+
+    /**
+     * Notifies the observers that the state of the model has changed.
+     */
+    LegendModel.prototype.notify = function () {
+        _.each(this.observers, (obs) => obs.updateLegend());
+    };
+
+    /**
+     * Class LegendController
+     *
+     * Class for manipulating the Legend
+     *
+     * @param {LegendModel} model Model for the controller.
+     * @param {LegendView} view View for the controller.
+     * @return LegendController
+     * @constructs LegendController
+     */
+    function LegendController(model, view) {
+        this.model = model;
+        this.view = view;
+    }
+
+    /**
+     * Remap the colors in the legend
+     * @param {Object} update Contains the keys and color mappings to update in the legend.
+     */
+    LegendController.prototype.remapColors = function (update) {
+        this.model.updateColorMap(update);
+    };
+
     /**
      *
-     * @class Legend
+     * @class Legend (View)
      *
      * Creates a legend within a given HTML element. (You'll need to call
      * addCategoricalKey(), addContinuousKey(), or addLengthKey() to populate
@@ -13,7 +185,12 @@ define(["jquery", "underscore", "util"], function ($, _, util) {
      * @return {Legend}
      * @constructs Legend
      */
-    function Legend(container) {
+    function Legend(container, enableUpdate = false) {
+        this.model = new LegendModel({});
+        this.model.registerObserver(this);
+        this.controller = new LegendController(this.model, this);
+        this.updateEnabled = enableUpdate;
+
         /**
          * @type {HTMLElement}
          * Reference to the element containing the legend.
@@ -103,6 +280,32 @@ define(["jquery", "underscore", "util"], function ($, _, util) {
         this._minLengthVal = null;
         this._maxLengthVal = null;
     }
+
+    /**
+     * @type {Function}
+     * The constructor of the model for the legend.
+     */
+    Legend.modelConstructor = LegendModel;
+
+    /**
+     * @type {Function}
+     * The constructor of the controller for the legend.
+     */
+    Legend.controllerConstructor = LegendController;
+
+    /**
+     * Enables the legend to be updated with a spectrum color picker
+     */
+    Legend.prototype.enableUpdate = function () {
+        this.updateEnabled = true;
+    };
+
+    /**
+     * Disables the legend from be updated with a spectrum color picker
+     */
+    Legend.prototype.disableUpdate = function () {
+        this.updateEnabled = false;
+    };
 
     /**
      * Adds a title element to the legend container.
@@ -229,7 +432,21 @@ define(["jquery", "underscore", "util"], function ($, _, util) {
                     "categories in the info"
             );
         }
+
+        this.model.setName(name);
+        this.model.setColorMap(info);
+    };
+
+    /**
+     * Updates the legend by pulling legend info from the model. This is the
+     * requisite function to implement the LegendObserver interface.
+     */
+    Legend.prototype.updateLegend = function () {
+        var scope = this;
         this.clear();
+        var info = this.model.getColorMap();
+        var name = this.model.getName();
+
         this.addTitle(name);
         this._sortedCategories = util.naturalSort(_.keys(info));
         this._category2color = info;
@@ -249,6 +466,16 @@ define(["jquery", "underscore", "util"], function ($, _, util) {
             colorCell.classList.add("category-color");
             colorCell.classList.add("frozen-cell");
             colorCell.setAttribute("style", "background: " + info[key] + ";");
+            colorCell.onclick = () => {
+                if (scope.updateEnabled) {
+                    var editor = new ColorEditor({
+                        container: colorCell,
+                        color: info[key],
+                        controller: scope.controller,
+                        colorKey: key,
+                    });
+                }
+            };
 
             // Add a label for that color box.
             var labelCell = newRow.insertCell(-1);

@@ -36,6 +36,18 @@ require([
                     ok(ele.classList.contains("legend-title"));
                     equal(ele.innerText, expText);
                 };
+
+                class MockLegendObserver {
+                    constructor() {
+                        this.notified = 0;
+                    }
+
+                    updateLegend() {
+                        this.notified++;
+                    }
+                }
+
+                this.mockLegendObserver = MockLegendObserver;
             },
             teardown: function () {
                 this.containerEle.remove();
@@ -328,6 +340,57 @@ require([
             equal(this.containerEle.children.length, 2);
             this.validateTitleEle(this.containerEle.children[1], titleText2);
             equal(legend.title, titleText2);
+        });
+        test("LegendModel Register Observer", function () {
+            var model = new Legend.modelConstructor();
+            var observer = new this.mockLegendObserver();
+            model.registerObserver(observer);
+            deepEqual(model.observers, [observer]);
+        });
+        test("LegendModel notify observer", function () {
+            var model = new Legend.modelConstructor();
+            var observer = new this.mockLegendObserver();
+            model.registerObserver(observer);
+            // the mock observer should increment its notified count
+            model.notify();
+            equal(observer.notified, 1);
+            model.notify();
+            equal(observer.notified, 2);
+        });
+        test("LegendModel unregister observer", function () {
+            var model = new Legend.modelConstructor();
+            var observer = new this.mockLegendObserver();
+            model.registerObserver(observer);
+            // the mock observer should increment its notified count
+            model.notify();
+            equal(observer.notified, 1);
+            model.unregisterObserver(observer);
+            model.notify();
+            equal(observer.notified, 1);
+        });
+        test("LegendModel notify on updateColorMap", function () {
+            var model = new Legend.modelConstructor();
+            var observer = new this.mockLegendObserver();
+            model.registerObserver(observer);
+            // the observer should be notified when the color map is updated
+            model.updateColorMap({ key: "val" });
+            equal(observer.notified, 1);
+        });
+        test("LegendModel notify on setColorMap", function () {
+            var model = new Legend.modelConstructor();
+            var observer = new this.mockLegendObserver();
+            model.registerObserver(observer);
+            // the observer should be notified when the color map is updated
+            model.setColorMap({ key: "val" });
+            equal(observer.notified, 1);
+        });
+        test("LegendModel notify on setName", function () {
+            var model = new Legend.modelConstructor();
+            var observer = new this.mockLegendObserver();
+            model.registerObserver(observer);
+            // the observer should be notified when the color map is updated
+            model.setName("LegendName");
+            equal(observer.notified, 1);
         });
     });
 });
