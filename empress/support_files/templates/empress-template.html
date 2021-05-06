@@ -99,6 +99,7 @@
             'ByteArray' : './js/byte-array',
             'BPTree' : './js/bp-tree',
             'Camera' : './js/camera',
+            'Commands': './js/commands',
             'Drawer' : './js/drawer',
             'SidePanel' : './js/side-panel-handler',
             'AnimationPanel' : './js/animation-panel-handler',
@@ -124,12 +125,12 @@
                     'SidePanel', 'AnimationPanel', 'Animator', 'BarplotLayer',
                     'BarplotPanel', 'BIOMTable', 'Empress', 'Legend',
                     'Colorer', 'VectorOps', 'CanvasEvents', 'SelectedNodeMenu',
-                    'util', 'LayoutsUtil', 'ExportUtil'],
+                    'util', 'LayoutsUtil', 'ExportUtil', 'Commands'],
         function($, gl, chroma, underscore, spectrum, filesaver, ByteArray,
                  BPTree, Camera, Drawer, SidePanel, AnimationPanel, Animator,
                  BarplotLayer, BarplotPanel, BIOMTable, Empress, Legend,
                  Colorer, VectorOps, CanvasEvents, SelectedNodeMenu, util,
-                 LayoutsUtil, ExportUtil) {
+                 LayoutsUtil, ExportUtil, Commands) {
         // initialze the tree and model
         var tree = new BPTree(
           {{ tree  }},
