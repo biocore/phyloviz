@@ -266,6 +266,15 @@ define([
         this._barplotUnit = null;
 
         /**
+         * @type {Number}
+         * Analogous to this._maxDisplacement, but for the nearest and farthest
+         * edges of barplots. Used for determining if a click event falls
+         * within a barplot range.
+         */
+        this._barplotMinDisplacement = null;
+        this._barplotMaxDisplacement = null;
+
+        /**
          * @type{Boolean}
          * Indicates whether or not barplots are currently drawn.
          * @private
@@ -1558,6 +1567,10 @@ define([
             this._maxDisplacement +
             this._barplotPanel.distBtwnTreeAndBarplots * this._barplotUnit;
 
+        // This is the "nearest" displacement where barplots start, so store
+        // this for later
+        this._barplotMinDisplacement = maxD;
+
         // As we iterate through the layers, we'll store the "previous layer
         // max D" as a separate variable. This will help us easily work with
         // layers of varying lengths.
@@ -1607,8 +1620,14 @@ define([
         });
         // Add a border on the outside of the outermost layer
         if (this._barplotPanel.useBorders) {
-            this.addBorderBarplotLayerCoords(barplotBuffer, prevLayerMaxD);
+            prevLayerMaxD = scope.addBorderBarplotLayerCoords(
+                barplotBuffer,
+                prevLayerMaxD
+            );
         }
+        // Update data on the farthest barplot point
+        this._barplotMaxDisplacement = prevLayerMaxD;
+
         return {
             coords: barplotBuffer,
             colorers: colorers,
@@ -3714,6 +3733,92 @@ define([
             return null;
         } else {
             return this._tree.length(this._tree.postorderselect(nodeKey));
+        }
+    };
+
+    Empress.prototype.isPointWithinBarplotRange = function (x, y) {
+        var scope = this;
+        if (this._barplotsDrawn) {
+            var inRange = function (d) {
+                return (
+                    d > scope._barplotMinDisplacement &&
+                    d <= scope._barplotMaxDisplacement
+                );
+            };
+
+            if (this._currentLayout === "Circular") {
+                var r = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+                return inRange(r);
+            } else if (this._currentLayout === "Rectangular") {
+                return inRange(x);
+            } else {
+                // barplots unsupported for the Unrooted layout
+                return false;
+            }
+        } else {
+            return false;
+        }
+    };
+
+    Empress.prototype.getTipByBarplotClickPoint = function (x, y) {
+        var node;
+        if (this._barplotsDrawn) {
+            var closestTip;
+            if (this._currentLayout === "Rectangular") {
+                // Find the tip with the closest y
+                var closestYDist = Infinity;
+                // Omit this._tree.size since the root is not a tip
+                for (node = 1; node < this._tree.size; node++) {
+                    if (this._tree.isleaf(this._tree.postorderselect(node))) {
+                        var newYDist = Math.abs(this.getY(node) - y);
+                        if (newYDist < closestYDist) {
+                            closestYDist = newYDist;
+                            closestTip = node;
+                        }
+                    }
+                }
+            } else if (this._currentLayout === "Circular") {
+                // We use atan2() to convert from Cartesian coordinates to
+                // the angle used for Polar coordinates. However, atan2 treats
+                // angles greater than pi (180 degrees) as being negative,
+                // whereas angles in Empress are stored in the range [0, 2pi].
+                // Basically, there are two different unit circles:
+                //
+                //       Math.atan2()       Empress
+                //
+                //           pi/2             pi/2
+                //            |                |
+                //-pi or pi --+-- 0       pi --+-- 0 or 2pi
+                //            |                |
+                //          -pi/2            3pi/2
+                //
+                // To address this, we just call atan2() and then -- if the
+                // angle returned is negative -- add 2pi to it. References:
+                // https://en.wikipedia.org/wiki/Atan2#endnote_a,
+                // https://stackoverflow.com/a/16614914/10730311,
+                // https://www.mathsisfun.com/polar-cartesian-coordinates.html.
+                var ptAngle = Math.atan2(y, x);
+                if (ptAngle < 0) {
+                    ptAngle += Math.PI * 2;
+                }
+                var closestAngleDist = Infinity;
+                for (node = 1; node < this._tree.size; node++) {
+                    if (this._tree.isleaf(this._tree.postorderselect(node))) {
+                        var newAngleDist = Math.abs(
+                            this.getNodeInfo(node, "angle") - ptAngle
+                        );
+                        if (newAngleDist < closestAngleDist) {
+                            closestAngleDist = newAngleDist;
+                            closestTip = node;
+                        }
+                    }
+                }
+            } else {
+                throw new Error("Unclear layout for barplots?");
+            }
+            return closestTip;
+        } else {
+            throw new Error("Barplots not drawn?");
         }
     };
 

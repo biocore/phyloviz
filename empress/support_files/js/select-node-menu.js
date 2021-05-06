@@ -325,7 +325,7 @@ define(["underscore", "util"], function (_, util) {
      * Displays the node selection menu. nodeKeys must be set in order to use
      * this method.
      */
-    SelectedNodeMenu.prototype.showNodeMenu = function () {
+    SelectedNodeMenu.prototype.showNodeMenu = function (customX, customY) {
         // make sure the state machine is set
         if (this.nodeKeys === null) {
             throw "showNodeMenu(): Nodes have not been selected.";
@@ -352,10 +352,11 @@ define(["underscore", "util"], function (_, util) {
             this.showInternalNode();
         }
 
-        // place menu-node menu next to the selected node
-        // (if multiple nodes are selected, updateMenuPosition() positions the
-        // menu next to an arbitrary one)
-        this.updateMenuPosition();
+        // place menu-node menu next to:
+        // -position of the only selected node, if only 1 node is selected
+        // -position of an arbitrary selected node, if multiple are selected
+        // -custom position, if specified
+        this.updateMenuPosition(customX, customY);
 
         show(this.box);
 
@@ -605,16 +606,24 @@ define(["underscore", "util"], function (_, util) {
      * placed at this node's position; if multiple nodes are selected, the menu
      * will be placed at the first node's position.
      */
-    SelectedNodeMenu.prototype.updateMenuPosition = function () {
+    SelectedNodeMenu.prototype.updateMenuPosition = function (
+        customX,
+        customY
+    ) {
         if (this.nodeKeys === null) {
             return;
         }
 
-        var nodeToPositionAt = this.nodeKeys[0];
-        // get table coords
-        var x = this.empress.getX(nodeToPositionAt);
-        var y = this.empress.getY(nodeToPositionAt);
-        var tableLoc = this.drawer.toScreenSpace(x, y);
+        var x, y, tableLoc;
+        if (_.isUndefined(customX) && _.isUndefined(customY)) {
+            var nodeToPositionAt = this.nodeKeys[0];
+            x = this.empress.getX(nodeToPositionAt);
+            y = this.empress.getY(nodeToPositionAt);
+        } else {
+            x = customX;
+            y = customY;
+        }
+        tableLoc = this.drawer.toScreenSpace(x, y);
 
         // set table location. add slight offset to location so menu appears
         // next to the node instead of on top of it.

@@ -145,6 +145,14 @@ define(["underscore", "glMatrix", "SelectedNodeMenu"], function (
                 var x = treeSpace.x;
                 var y = treeSpace.y;
 
+                // If the clicked point is within the barplot area, show a menu
+                // for the corresponding tip node.
+                if (empress.isPointWithinBarplotRange(x, y)) {
+                    var tipKey = scope.empress.getTipByBarplotClickPoint(x, y);
+                    scope.placeBarplotNodeSelectionMenu(tipKey, x, y);
+                    return;
+                }
+
                 // check if mouse is in a clade
                 var clade = empress.getRootNodeForPointInClade([x, y]);
                 if (clade !== -1) {
@@ -462,6 +470,18 @@ define(["underscore", "glMatrix", "SelectedNodeMenu"], function (
                 this.quickSearchBar.classList.add("invalid-search");
             }
         }
+    };
+
+    CanvasEvents.prototype.placeBarplotNodeSelectionMenu = function (
+        tipKey,
+        x,
+        y
+    ) {
+        this.selectedNodeMenu.setSelectedNodes([tipKey]);
+        // TODO: store customx and customy here, and use when calling
+        // updatemenuposition in this class...
+        this.selectedNodeMenu.showNodeMenu(x, y);
+        this.empress.drawTree();
     };
 
     return CanvasEvents;
